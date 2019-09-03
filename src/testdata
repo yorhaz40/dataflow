@@ -1,0 +1,88 @@
+public class test{
+private void videoTestHelper(VideoRipper ripper) {
+    URL oldURL = ripper.getURL();
+        try {
+                ripper.setup();
+               	ripper.markAsTest();        
+               	ripper.rip();        // Video ripper testing is... weird.
+               	        // If the ripper finds the URL to download the video, and it's a test,        
+               	        // then the ripper sets the download URL as the ripper's URL.        
+               	assertFalse("Failed to find download url for " + oldURL, oldURL.equals(ripper.getURL()));
+               	    } catch (Exception e) {
+               	      fail("Error while ripping " + ripper.getURL() + " : " + e);        
+               	      e.printStackTrace();    
+               	 } finally {       
+               	 deleteDir(ripper.getWorkingDir());    }
+}
+
+
+
+private Builder setStackTrace(Throwable t) {
+    // view button
+        stage.viewStacktraceButton = new ToggleButton(getString("buttonlabel.viewstacktrace"));
+        // copy button
+        stage.copyStacktraceButton = new Button(getString("buttonlabel.copystacktrace"));
+        HBox.setMargin(stage.copyStacktraceButton, new Insets(0, 0, 0, MARGIN));
+        stage.stacktraceButtonsPanel = new HBox();
+        stage.stacktraceButtonsPanel.getChildren().addAll(stage.viewStacktraceButton, stage.copyStacktraceButton);
+        VBox.setMargin(stage.stacktraceButtonsPanel, new Insets(MARGIN, MARGIN, MARGIN, 0));
+        stage.messageBox.getChildren().add(stage.stacktraceButtonsPanel);
+        // stacktrace text
+        stage.stackTraceLabel = new Label();
+        stage.stackTraceLabel.widthProperty().addListener(new ChangeListener<Number>() {
+        public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+        alignScrollPane();
+              }
+            });
+        stage.stackTraceLabel.heightProperty().addListener(new ChangeListener<Number>() {
+        public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+        alignScrollPane();
+        }
+        });
+        StacktraceExtractor extractor = new StacktraceExtractor();
+        stage.stacktrace = extractor.extract(t);
+        stage.scrollPane = new ScrollPane();
+        stage.scrollPane.setContent(stage.stackTraceLabel);
+        stage.viewStacktraceButton.setOnAction(new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent t) {
+        stage.stacktraceVisible = !stage.stacktraceVisible;
+        if (stage.stacktraceVisible) {
+        stage.messageBox.getChildren().add(stage.scrollPane);
+        stage.stackTraceLabel.setText(stage.stacktrace);
+        alignScrollPane();
+        } else {
+        stage.messageBox.getChildren().remove(stage.scrollPane);
+        // alignScrollPane();
+        stage.setWidth(stage.originalWidth);
+        stage.setHeight(stage.originalHeight);
+        stage.stackTraceLabel.setText(null);
+        stage.centerOnScreen();
+        }
+        stage.messageBox.layout();
+        }
+        });
+        stage.copyStacktraceButton.setOnAction(new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent t) {
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        Map<DataFormat, Object> map = new HashMap<DataFormat, Object>();
+        map.put(DataFormat.PLAIN_TEXT, stage.stacktrace);
+        clipboard.setContent(map);
+        }
+        });
+        stage.showingProperty().addListener(new ChangeListener<Boolean>() {
+        public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+        if (newValue) {
+        stage.originalWidth = stage.getWidth();
+        stage.originalHeight = stage.getHeight();
+        }
+        }
+        });
+        return this;
+        }
+
+
+
+
+
+
+}
